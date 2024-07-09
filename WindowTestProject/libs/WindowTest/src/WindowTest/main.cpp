@@ -3,7 +3,7 @@
 
 int main(void)
 {
-	std::cout << "efakjhsjdhfkalsdfjlk" << std::endl;
+	std::cout << "yeppers im main" << std::endl;
 
 	return 0;
 }
