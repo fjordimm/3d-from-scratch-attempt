@@ -6,7 +6,8 @@ SRC_DIR := ./src
 BUILD_DIR := ./build
 
 SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+_OBJS := $(SRCS:.cpp=.o)
+OBJS := $(_OBJS:%=$(BUILD_DIR)/%)
 
 #########################################
 
@@ -14,12 +15,14 @@ TARGET := MainProgram
 
 #########################################
 
-.PHONY: clean run
+.PHONY: all clean run
+
+all: $(BUILD_DIR)/$(TARGET)
 
 $(BUILD_DIR)/$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-$(BUILD_DIR)/%.cpp.o: %.cpp
+$(BUILD_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
