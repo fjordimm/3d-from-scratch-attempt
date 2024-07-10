@@ -1,4 +1,4 @@
 cd ./WindowTestProject/build/
-cmake ..
+cmake .. -D GLFW_BUILD_WAYLAND=0
 cmake --build .
 cd ../..
