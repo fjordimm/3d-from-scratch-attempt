@@ -10,9 +10,13 @@ const char* vertexShaderSource = R"glsl(
 	#version 150 core
 
 	in vec2 position;
+	in vec3 color;
+
+	out vec3 Color;
 
 	void main()
 	{
+		Color = color;
 		gl_Position = vec4(position, 0.0, 1.0);
 	}
 )glsl";
@@ -20,13 +24,13 @@ const char* vertexShaderSource = R"glsl(
 const char* fragmentShaderSource = R"glsl(
 	#version 150 core
 
-	uniform vec3 triangleColor;
+	in vec3 Color;
 
 	out vec4 outColor;
 
 	void main()
 	{
-		outColor = vec4(triangleColor, 1.0);
+		outColor = vec4(Color, 1.0);
 	}
 )glsl";
 
@@ -77,9 +81,9 @@ int main(void)
 
 		float verts1[] =
 		{
-			0.0f, 0.5f,
-			0.5f, -0.5f,
-			-0.5f, -0.5f
+			 0.0f,  0.5f,      1.0f,0.0f,0.0f,
+			 0.5f, -0.5f,      0.0f,1.0f,0.0f,
+			-0.5f, -0.5f,      0.0f,0.0f,1.0f
 		};
 
 		GLuint vbo;
@@ -106,11 +110,12 @@ int main(void)
 		glUseProgram(shaderProgram);
 
 		GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-		glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(posAttrib);
+		glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 
-		GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
-		glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+		GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+		glEnableVertexAttribArray(colAttrib);
+		glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 	/////////////////////////////////////////////////
 
 	// GLuint vertexBuffer;
