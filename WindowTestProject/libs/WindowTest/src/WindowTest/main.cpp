@@ -6,6 +6,28 @@
 #include <cstdio>
 #include <cstdlib>
 
+const char* vertexShaderSource = R"glsl(
+	#version 150 core
+
+	in vec2 position;
+
+	void main()
+	{
+		gl_Position = vec4(position, 0.0, 1.0);
+	}
+)glsl";
+
+const char* fragmentShaderSource = R"glsl(
+	#version 150 core
+
+	out vec4 outColor;
+
+	void main()
+	{
+		outColor = vec4(1.0, 1.0, 1.0, 1.0);
+	}
+)glsl";
+
 void checkShaderCompilation(GLuint shader)
 {
 	GLint status;
@@ -25,9 +47,7 @@ void checkShaderCompilation(GLuint shader)
 
 int main(void)
 {
-	std::printf("helooooooo\n");
-
-    GLFWwindow* window;
+	GLFWwindow* window;
 
     /* Initialize the library */
     if (!glfwInit())
@@ -49,7 +69,10 @@ int main(void)
 	glewInit();
 
 	/////////////////////////////////////////////////
-	{
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
 		float verts1[] =
 		{
 			0.0f, 0.5f,
@@ -57,42 +80,32 @@ int main(void)
 			-0.5f, -0.5f
 		};
 
-		GLuint vbo1;
-		glGenBuffers(1, &vbo1);
+		GLuint vbo;
+		glGenBuffers(1, &vbo);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verts1), verts1, GL_STATIC_DRAW);
 
-		const char* vertexShaderSource = R"glsl(
-			#version 150 core
-
-			in vec2 position;
-
-			void main()
-			{
-				gl_Position = vec4(position, 0.0, 1.0);
-			}
-		)glsl";
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
 		glCompileShader(vertexShader);
 		checkShaderCompilation(vertexShader);
 
-		const char* fragmentShaderSource = R"glsl(
-			#version 150 core
-
-			out vec4 outColor;
-
-			void main()
-			{
-				outColor = vec4(1.0, 1.0, 1.0, 1.0);
-			}
-		)glsl";
 		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
 		glCompileShader(fragmentShader);
 		checkShaderCompilation(fragmentShader);
-	}
+
+		GLuint shaderProgram = glCreateProgram();
+		glAttachShader(shaderProgram, vertexShader);
+		glAttachShader(shaderProgram, fragmentShader);
+
+		glLinkProgram(shaderProgram);
+		glUseProgram(shaderProgram);
+
+		GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+		glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(posAttrib);
 	/////////////////////////////////////////////////
 
 	// GLuint vertexBuffer;
@@ -109,13 +122,19 @@ int main(void)
 		glClearColor(0.4f, 0.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Do stuff required by GLFW */
 
 		glfwPollEvents();
         glfwSwapBuffers(window);
     }
+
+	glDeleteProgram(shaderProgram);
+	glDeleteShader(fragmentShader);
+	glDeleteShader(vertexShader);
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
 
     glfwTerminate();
     return 0;
